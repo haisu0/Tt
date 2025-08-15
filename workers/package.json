@@ -1,0 +1,14 @@
+{
+  "name": "tiktok-downloader-worker",
+  "version": "1.0.0",
+  "description": "TikTok Downloader API for Cloudflare Workers",
+  "main": "tiktok-downloader.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240208.0",
+    "wrangler": "^3.0.0"
+  }
+}

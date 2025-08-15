@@ -1,0 +1,6 @@
+name = "tiktok-downloader"
+main = "tiktok-downloader.ts"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "tiktok-downloader"
