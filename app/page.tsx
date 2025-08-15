@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect, useRef } from "react"
 import {
   Download,
@@ -63,9 +61,9 @@ export default function TikTokDownloader() {
   const [playingVideo, setPlayingVideo] = useState<string | null>(null)
   const [playingAudio, setPlayingAudio] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    // Auto fullscreen on load
     const enterFullscreen = async () => {
       try {
         if (document.documentElement.requestFullscreen) {
@@ -77,8 +75,10 @@ export default function TikTokDownloader() {
       }
     }
 
+    // Try to enter fullscreen after a short delay
     const timer = setTimeout(enterFullscreen, 1000)
 
+    // Listen for fullscreen changes
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement)
     }
@@ -117,10 +117,6 @@ export default function TikTokDownloader() {
       return
     }
 
-    if (inputRef.current) {
-      inputRef.current.blur()
-    }
-
     setLoading(true)
     try {
       const response = await fetch("/api/download", {
@@ -150,12 +146,6 @@ export default function TikTokDownloader() {
       })
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleDownload()
     }
   }
 
@@ -225,6 +215,7 @@ export default function TikTokDownloader() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-red-950 text-white relative overflow-hidden">
+      {/* Animated Background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -239,6 +230,7 @@ export default function TikTokDownloader() {
         {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
       </Button>
 
+      {/* Creator Credit */}
       <div className="fixed bottom-4 right-4 z-50">
         <a
           href="https://instagram.com/al_azet"
@@ -252,6 +244,7 @@ export default function TikTokDownloader() {
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-8">
+        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold bg-gradient-to-r from-red-500 via-pink-500 to-cyan-400 bg-clip-text text-transparent mb-4 animate-pulse">
             TikTok
@@ -260,23 +253,23 @@ export default function TikTokDownloader() {
           <p className="text-gray-400 text-base md:text-lg">Download TikTok videos and photos without watermark</p>
         </div>
 
+        {/* Download Form */}
         <div className="max-w-2xl mx-auto mb-12">
           <Card className="bg-black/40 border-red-500/30 backdrop-blur-sm">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row gap-4">
                 <Input
-                  ref={inputRef}
                   type="url"
                   placeholder="Paste TikTok URL here..."
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   className="flex-1 bg-gray-900/50 border-gray-700 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20"
-                  onKeyPress={handleKeyPress}
+                  onKeyPress={(e) => e.key === "Enter" && handleDownload()}
                 />
                 <Button
                   onClick={handleDownload}
-                  disabled={loading || !url.trim()}
-                  className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold px-8 py-2 min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={loading}
+                  className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold px-8 py-2 min-w-[120px]"
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">
@@ -295,53 +288,7 @@ export default function TikTokDownloader() {
           </Card>
         </div>
 
-        <div className="max-w-4xl mx-auto mb-12">
-          <Card className="bg-black/40 border-yellow-500/30 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-yellow-400 mb-4">API Usage for Workers.dev Deployment</h3>
-              <div className="space-y-4 text-sm">
-                <div>
-                  <h4 className="text-white font-semibold mb-2">POST Request:</h4>
-                  <div className="bg-gray-900/50 p-3 rounded-lg font-mono text-gray-300">
-                    <p>POST https://your-worker.workers.dev/</p>
-                    <p>Content-Type: application/json</p>
-                    <p>{`{ "url": "https://tiktok.com/@username/video/123456789" }`}</p>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-white font-semibold mb-2">GET Request:</h4>
-                  <div className="bg-gray-900/50 p-3 rounded-lg font-mono text-gray-300">
-                    <p>GET https://your-worker.workers.dev/?url=https://tiktok.com/@username/video/123456789</p>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-white font-semibold mb-2">Response Format:</h4>
-                  <div className="bg-gray-900/50 p-3 rounded-lg font-mono text-gray-300 text-xs">
-                    <pre>{`{
-  "success": true,
-  "data": {
-    "title": "Video title",
-    "author": { "nickname": "username", "avatar": "..." },
-    "data": [
-      { "type": "nowatermark", "url": "video_url" },
-      { "type": "watermark", "url": "video_url" },
-      { "type": "hd", "url": "video_url" }
-    ],
-    "music_info": { "title": "song", "url": "audio_url" },
-    "stats": { "views": "1M", "likes": "100K" }
-  }
-}`}</pre>
-                  </div>
-                </div>
-                <p className="text-gray-400">
-                  <strong className="text-yellow-400">Note:</strong> Deploy the worker script from the workers/ folder
-                  to Cloudflare Workers for serverless API access.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
+        {/* Results */}
         {data && (
           <div className="max-w-6xl mx-auto space-y-8">
             {data.music_info && (
@@ -488,9 +435,11 @@ export default function TikTokDownloader() {
               </Card>
             )}
 
+            {/* Video Info */}
             <Card className="bg-black/40 border-purple-500/30 backdrop-blur-sm">
               <CardContent className="p-6">
                 <div className="grid md:grid-cols-2 gap-6">
+                  {/* Title and Author */}
                   <div className="space-y-6">
                     <div>
                       <h3 className="text-xl font-bold text-white mb-2">{data.title}</h3>
@@ -512,6 +461,7 @@ export default function TikTokDownloader() {
                     </div>
                   </div>
 
+                  {/* Stats */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex items-center gap-2 p-3 bg-gray-900/50 rounded-lg">
                       <Eye className="w-5 h-5 text-blue-400" />
